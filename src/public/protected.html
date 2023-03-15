@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Home</title>
+  </head>
+  <body>
+    <h1>Ruta protegida</h1>
+    <div>
+      <h2 id="app"></h2>
+      <button id="logout">Cerrar sesion</button>
+    </div>
+
+    <script>
+      const logout = document.getElementById("logout");
+      logout.addEventListener("click", async () => {
+        const res = await fetch("/api/auth/logout");
+        console.log(res);
+      });
+
+      document.addEventListener("DOMContentLoaded", async (e) => {
+        try {
+          const resToken = await fetch(
+            "http://localhost:5001/api/auth/refresh",
+            {
+              method: "GET",
+              credentials: "include",
+            }
+          );
+          const { token } = await resToken.json();
+          const res = await fetch("http://localhost:5001/api/auth/protected", {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          });
+          console.log(res.ok, res.status);
+          const data = await res.json();
+          console.log(data);
+
+          if (res.ok) {
+            document.getElementById("app").innerHTML = `Email: ${data.email}`;
+          }
+        } catch (error) {
+          console.log(error);
+        }
+      });
+    </script>
+  </body>
+</html>
